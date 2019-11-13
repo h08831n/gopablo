@@ -4,7 +4,7 @@ GoPablo - Static site generator
 Contributors: Luan Gjokaj, Sherif Saleh
 
 -------------------------------------------------------------------------------------------------- */
-const { gulp, series, parallel, dest, src, watch } = require('gulp');
+const {gulp, series, parallel, dest, src, watch} = require('gulp');
 const babel = require('gulp-babel');
 const browserSync = require('browser-sync').create();
 const concat = require('gulp-concat');
@@ -24,6 +24,7 @@ const RevAll = require('gulp-rev-all');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const purgecss = require('gulp-purgecss');
+const sass = require('gulp-sass');
 
 //--------------------------------------------------------------------------------------------------
 /* -------------------------------------------------------------------------------------------------
@@ -68,9 +69,11 @@ Header & Footer JavaScript Boundles
 -------------------------------------------------------------------------------------------------- */
 const headerJS = ['./node_modules/aos/dist/aos.js'];
 const footerJS = [
-	'./node_modules/webfontloader/webfontloader.js',
-	'./node_modules/jquery/dist/jquery.js',
-	'./src/assets/js/**',
+	// './node_modules/webfontloader/webfontloader.js',
+	// './node_modules/jquery/dist/jquery.js',
+	'./src/assets/js/jquery.min.js',
+	'./node_modules/swiper/js/swiper.js',
+	'./src/assets/js/scripts.js',
 ];
 
 //--------------------------------------------------------------------------------------------------
@@ -87,6 +90,7 @@ function devServer() {
 	});
 
 	watch('./src/assets/css/**/*.css', stylesDev);
+	watch('./src/assets/css/**/*.scss', stylesDev);
 	watch('./src/assets/js/**', series(footerScriptsDev, Reload));
 	watch('./src/assets/img/**', series(copyImagesDev, Reload));
 	watch('./src/assets/fonts/**', series(copyFontsDev, Reload));
@@ -107,9 +111,10 @@ function copyFontsDev() {
 }
 
 function stylesDev() {
-	return src('./src/assets/css/styles.css')
-		.pipe(plumber({ errorHandler: onError }))
+	return src('./src/assets/css/styles.scss')
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(sourcemaps.init())
+		.pipe(sass({includePaths: 'node_modules'}).on("error", sass.logError))
 		.pipe(postcss(pluginsDev))
 		.pipe(sourcemaps.write('.'))
 		.pipe(dest('./build/assets/css'))
@@ -118,7 +123,7 @@ function stylesDev() {
 
 function headerScriptsDev() {
 	return src(headerJS)
-		.pipe(plumber({ errorHandler: onError }))
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(sourcemaps.init())
 		.pipe(concat('header-bundle.js'))
 		.pipe(sourcemaps.write('.'))
@@ -127,7 +132,7 @@ function headerScriptsDev() {
 
 function footerScriptsDev() {
 	return src(footerJS)
-		.pipe(plumber({ errorHandler: onError }))
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(sourcemaps.init())
 		.pipe(
 			babel({
@@ -141,7 +146,7 @@ function footerScriptsDev() {
 
 function staticFilesDev() {
 	return src('./src/*.html')
-		.pipe(plumber({ errorHandler: onError }))
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(
 			fileinclude({
 				filters: {
@@ -176,7 +181,7 @@ function copyFontsProd() {
 
 function headerScriptsProd() {
 	return src(headerJS)
-		.pipe(plumber({ errorHandler: onError }))
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(concat('header-bundle.js'))
 		.pipe(uglify())
 		.pipe(dest('./dist/assets/js'));
@@ -184,7 +189,7 @@ function headerScriptsProd() {
 
 function footerScriptsProd() {
 	return src(footerJS)
-		.pipe(plumber({ errorHandler: onError }))
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(
 			babel({
 				presets: ['@babel/preset-env'],
@@ -197,7 +202,7 @@ function footerScriptsProd() {
 
 function staticFilesProd() {
 	return src('./src/*.html')
-		.pipe(plumber({ errorHandler: onError }))
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(
 			fileinclude({
 				filters: {
@@ -221,9 +226,9 @@ function copyImagesProd() {
 
 function processImages() {
 	return src(['./dist/assets/img/**'])
-		.pipe(plumber({ errorHandler: onError }))
+		.pipe(plumber({errorHandler: onError}))
 		.pipe(
-			imagemin([imagemin.svgo({ plugins: [{ removeViewBox: true }] })], {
+			imagemin([imagemin.svgo({plugins: [{removeViewBox: true}]})], {
 				verbose: true,
 			}),
 		)
@@ -231,13 +236,12 @@ function processImages() {
 }
 
 function stylesProd() {
-	return src('./src/assets/css/styles.css')
-		.pipe(plumber({ errorHandler: onError }))
+	return src('./src/assets/css/styles.scss')
 		.pipe(postcss(pluginsProd))
-		.pipe(purgecss({ content: ['./src/**/*.html'], whitelist: ['aos-animate'] }))
-		.pipe(dest('./dist/assets/css'));
+		.pipe(sass({includePaths: 'node_modules'}).on("error", sass.logError))
+		.pipe(dest('./dist/assets/css'))
+		.pipe(purgecss({content: ['./src/**/*.html'], whitelist: ['aos-animate']}))
 }
-
 function copyEtcProd() {
 	return src('./src/etc/manifest.json').pipe(dest('./dist'));
 }

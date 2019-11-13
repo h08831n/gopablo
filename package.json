@@ -19,7 +19,9 @@
 		"static",
 		"web",
 		"website",
-		"workflow"
+		"workflow",
+		"node-sass",
+		"swiper",
 	],
 	"homepage": "https://www.gopablo.co",
 	"repository": "https://github.com/luangjokaj/gopablo",
