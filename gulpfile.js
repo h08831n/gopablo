@@ -67,11 +67,12 @@ const pluginsProd = [
 /* -------------------------------------------------------------------------------------------------
 Header & Footer JavaScript Boundles
 -------------------------------------------------------------------------------------------------- */
-const headerJS = ['./node_modules/aos/dist/aos.js'];
+const headerJS = [
+	// './node_modules/aos/dist/aos.js'
+];
 const footerJS = [
 	// './node_modules/webfontloader/webfontloader.js',
-	// './node_modules/jquery/dist/jquery.js',
-	'./src/assets/js/jquery.min.js',
+	'./node_modules/jquery/dist/jquery.js',
 	'./node_modules/swiper/js/swiper.js',
 	'./src/assets/js/scripts.js',
 ];
